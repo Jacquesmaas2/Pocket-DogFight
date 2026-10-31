@@ -40,6 +40,17 @@ Environment overrides: `PD_PORT`, `PD_TRANSPORT` (`websocket|enet`), `PD_PUBLIC_
 ```
 Window 1: Host Game > Start Hosting. Window 2: Join Game > `127.0.0.1` > Connect. Window 1: Start Match.
 
+## Browser / phone (no app install)
+```powershell
+.\tools\export_web.ps1                 # builds export/web (needs the Web export templates)
+.\tools\run_server.ps1                 # game server on this laptop (WebSocket)
+.\tools\start_tunnel.ps1               # public wss:// for the game server
+.\tools\serve_web.ps1 -Tunnel -Server wss://<game-tunnel>.trycloudflare.com
+```
+Share the printed `https://<web-tunnel>.trycloudflare.com/?server=wss://...` link; `?server=` pre-fills and opens the Join dialog. Browser builds cannot host (no listening sockets) and only use WebSocket.
+
+Vercel instead of a laptop for the static files: `vercel deploy` in the repo root (uses `vercel.json`, output `export/web`). The game server still runs on your laptop behind the tunnel; link as `https://<your-app>.vercel.app/?server=wss://...`.
+
 ## Story mode
 Main menu > **Story: Loek & Jacques** > pick a mission (missions unlock in order; all unlocked in debug builds). You fly Jacques (The Syntiq); Loek (The Bad Idea) is an AI wingman/rival.
 

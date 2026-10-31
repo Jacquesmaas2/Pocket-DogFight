@@ -11,7 +11,7 @@ $listener.Start()
 Write-Host "Serving $root on http://localhost:$Port/" -ForegroundColor Cyan
 if ($Tunnel) {
     $log = "$env:TEMP\pd_webtunnel.log"
-    Start-Process cloudflared -ArgumentList "tunnel --url http://localhost:$Port" -NoNewWindow -RedirectStandardError $log
+    Start-Process cloudflared -ArgumentList "tunnel --url http://localhost:$Port --http-host-header localhost:$Port" -NoNewWindow -RedirectStandardError $log
     Start-Sleep 8
     $url = (Get-Content $log | Select-String -Pattern "https://[a-z0-9-]+\.trycloudflare\.com" -AllMatches).Matches.Value | Select-Object -First 1
     if ($Server) { $url = "$url/?server=$Server" }
