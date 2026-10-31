@@ -8,6 +8,7 @@ signal connection_failed(reason: String)
 signal connected_to_host
 signal disconnected_from_host
 signal hosting_started
+signal lobby_status_changed(text: String, seconds_left: int)
 
 const TRANSPORT_ENET := "enet"
 const TRANSPORT_WEBSOCKET := "websocket"
@@ -19,6 +20,10 @@ var transport: String = TRANSPORT_WEBSOCKET
 var port: int = 24565
 var public_url: String = ""
 var story_mode: bool = false
+## Public "always on" server the PLAY ONLINE button connects to (project setting / env / server.txt on web).
+var default_server: String = ""
+var lobby_status: String = ""
+var lobby_seconds: int = -1
 # External multiplayer service configuration (never committed values; see WEB-DEPLOYMENT.md).
 var signaling_url: String = ""
 var ice_servers: Array = [] # e.g. [{"urls": ["stun:stun.example.org:3478"]}]
@@ -37,7 +42,13 @@ func _ready() -> void:
 
 
 func _read_environment() -> void:
+	default_server = str(ProjectSettings.get_setting("pocket_dogfight/default_server", ""))
+	var env_default := OS.get_environment("PD_DEFAULT_SERVER")
+	if env_default != "":
+		default_server = env_default
 	var env_port := OS.get_environment("PD_PORT")
+	if env_port == "":
+		env_port = OS.get_environment("PORT") # Fly.io / Render / Railway convention
 	if env_port.is_valid_int():
 		port = int(env_port)
 	var env_transport := OS.get_environment("PD_TRANSPORT")
@@ -207,6 +218,8 @@ func _on_peer_disconnected(id: int) -> void:
 
 func _on_connected() -> void:
 	_hello.rpc_id(1, Settings.player_name, Settings.preferred_ship)
+	if _pending_timeout != null and _pending_timeout.timeout.is_connected(_on_connect_timeout):
+		_pending_timeout.timeout.disconnect(_on_connect_timeout)
 	connected_to_host.emit()
 
 
@@ -241,6 +254,8 @@ func _hello(pname: String, ship: String) -> void:
 		color += 1
 	players[id] = _make_player(pname, ship, color)
 	_sync_players.rpc(players)
+	if lobby_status != "":
+		_lobby_status.rpc_id(id, lobby_status, lobby_seconds)
 	players_changed.emit()
 
 
@@ -248,6 +263,33 @@ func _hello(pname: String, ship: String) -> void:
 func _sync_players(data: Dictionary) -> void:
 	players = data
 	players_changed.emit()
+
+
+## Server: tell everyone in the lobby what is happening ("Waiting for players 1/2", countdown...).
+func set_lobby_status(text: String, seconds_left: int = -1) -> void:
+	if not is_server():
+		return
+	_lobby_status.rpc(text, seconds_left)
+	_lobby_status(text, seconds_left)
+
+
+@rpc("authority", "reliable", "call_remote")
+func _lobby_status(text: String, seconds_left: int) -> void:
+	lobby_status = text
+	lobby_seconds = seconds_left
+	lobby_status_changed.emit(text, seconds_left)
+
+
+## Share link for the browser build (falls back to the raw server address).
+func share_link(server_address: String) -> String:
+	var pages := str(ProjectSettings.get_setting("pocket_dogfight/web_client_url", ""))
+	if OS.has_feature("web"):
+		var origin = JavaScriptBridge.eval("window.location.origin + window.location.pathname", true)
+		if origin != null and str(origin) != "":
+			pages = str(origin)
+	if pages == "":
+		return server_address
+	return "%s?server=%s" % [pages, server_address]
 
 
 func broadcast_players() -> void:

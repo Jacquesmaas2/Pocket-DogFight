@@ -1,0 +1,11 @@
+# Render.com blueprint: Dashboard -> New -> Blueprint -> pick this repo.
+# Public address becomes wss://<service-name>.onrender.com (free tier sleeps when idle; first join wakes it).
+services:
+  - type: web
+    name: pocket-dogfight-server
+    runtime: docker
+    dockerfilePath: ./server/Dockerfile
+    plan: free
+    envVars:
+      - key: PD_TRANSPORT
+        value: websocket

@@ -1,0 +1,24 @@
+# Fly.io config for the always-on game server. Deploy from the repo root:
+#   fly launch --no-deploy --copy-config --name pocket-dogfight   (first time; pick a region near your players)
+#   fly deploy
+# The public address becomes wss://<app-name>.fly.dev (TLS terminated by Fly, forwarded to port 8080).
+app = "pocket-dogfight"
+primary_region = "ams"
+
+[build]
+  dockerfile = "server/Dockerfile"
+
+[env]
+  PORT = "8080"
+  PD_TRANSPORT = "websocket"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

@@ -73,6 +73,12 @@ jobs:
           rm -f build/.gdignore build/web/*.import
           ls -la build/web
 
+      - name: Write public server address (repository variable DEFAULT_SERVER_URL)
+        env:
+          SERVER_URL: ${{ vars.DEFAULT_SERVER_URL }}
+        run: |
+          if [ -n "$SERVER_URL" ]; then echo "$SERVER_URL" > build/web/server.txt; echo "PLAY ONLINE -> $SERVER_URL"; else echo "No DEFAULT_SERVER_URL variable set; PLAY ONLINE will ask for a link."; fi
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

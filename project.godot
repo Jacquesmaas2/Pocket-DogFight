@@ -96,6 +96,13 @@ pointing/emulate_touch_from_mouse=true
 common/physics_ticks_per_second=60
 2d/default_gravity=0.0
 
+[pocket_dogfight]
+
+; Public always-on server used by PLAY ONLINE (wss://host). Overridden by PD_DEFAULT_SERVER env or build/web/server.txt.
+default_server=""
+; Public URL of the browser build; used to build share links from native clients.
+web_client_url="https://jacquesmaas2.github.io/Pocket-DogFight/"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

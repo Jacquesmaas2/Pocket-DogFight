@@ -246,6 +246,9 @@ func _on_peer_left(id: int) -> void:
 		respawn_timers.erase(id)
 		if ships.find_ship(id) != null:
 			ships.server_remove(id)
+		if Net.is_dedicated and Net.players.is_empty():
+			# Empty dedicated server: go back to the waiting lobby for the next group.
+			get_tree().call_deferred("change_scene_to_file", "res://scenes/bootstrap/bootstrap.tscn")
 
 
 func _on_ship_spawned(ship: Ship) -> void:
