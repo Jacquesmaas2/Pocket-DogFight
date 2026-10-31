@@ -8,6 +8,7 @@ extends Node
 var _fails: int = 0
 var _passes: int = 0
 var _net_mode: String = ""
+var _net_transport: String = "enet"
 var _detached: bool = false
 const NET_PORT := 24599
 
@@ -22,6 +23,8 @@ func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--net="):
 			_net_mode = a.get_slice("=", 1)
+		elif a.begins_with("--transport="):
+			_net_transport = a.get_slice("=", 1)
 	if _net_mode != "":
 		await _run_network_test()
 	else:
@@ -195,15 +198,27 @@ func _run_local_tests() -> void:
 	check(smm.state == MatchManager.State.ACTIVE and smm.ships.local_ship().can_act(), "story mission is immediately playable")
 	story_scene.queue_free()
 	await frames(2)
+	# Smoke-run every mission for a few seconds to surface runtime script errors.
+	for mid in range(1, MissionRunner.MISSION_COUNT):
+		Net.host_offline(true)
+		Game.current_mission_id = mid
+		var sc: Node = load("res://scenes/game/match.tscn").instantiate()
+		get_tree().root.add_child(sc)
+		await get_tree().create_timer(3.0).timeout
+		var m: MatchManager = MatchManager.instance
+		var ok := m != null and m.story and m.ships.local_ship() != null and m.ships.all_ships().size() >= 2
+		check(ok, "story mission %d boots with player + AI (%d ships)" % [mid + 1, m.ships.all_ships().size() if m != null else 0])
+		sc.queue_free()
+		await frames(2)
 
 
 # ---------------------------------------------------------------- network (two instances)
 func _run_network_test() -> void:
 	Net.port = NET_PORT
-	Net.transport = Net.TRANSPORT_ENET
+	Net.transport = _net_transport
 	if _net_mode == "host":
 		Settings.player_name = "HostPilot"
-		check(Net.host(Net.TRANSPORT_ENET) == OK, "host opened ENet server")
+		check(Net.host(_net_transport) == OK, "host opened %s server" % _net_transport)
 		var waited := 0.0
 		while Net.players.size() < 2 and waited < 20.0:
 			await get_tree().create_timer(0.2).timeout
@@ -241,7 +256,8 @@ func _run_network_test() -> void:
 	else:
 		Settings.player_name = "ClientPilot"
 		await get_tree().create_timer(1.0).timeout
-		check(Net.join("enet://127.0.0.1:%d" % NET_PORT) == OK, "client join initiated")
+		var addr := "enet://127.0.0.1:%d" % NET_PORT if _net_transport == "enet" else "ws://127.0.0.1:%d" % NET_PORT
+		check(Net.join(addr) == OK, "client join initiated (%s)" % addr)
 		var waited := 0.0
 		while Net.players.size() < 2 and waited < 20.0:
 			await get_tree().create_timer(0.2).timeout

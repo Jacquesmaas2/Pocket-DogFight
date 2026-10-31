@@ -4,3 +4,4 @@ export/
 *.keystore
 *.jks
 export_presets.cfg.local
+export/web/*.import

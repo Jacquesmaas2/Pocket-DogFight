@@ -15,13 +15,15 @@ Write-Host "== Local tests =="
 & $Godot --headless --path $root res://tests/test_runner.tscn
 $local = $LASTEXITCODE
 if ($Net) {
-    Write-Host "== Two-instance network test =="
-    $host_proc = Start-Process -FilePath $Godot -ArgumentList "--headless --path `"$root`" res://tests/test_runner.tscn -- --net=host" -PassThru -NoNewWindow -RedirectStandardOutput "$env:TEMP\pd_host.log"
-    Start-Sleep -Seconds 2
-    & $Godot --headless --path $root res://tests/test_runner.tscn -- --net=client
-    $client = $LASTEXITCODE
-    $host_proc.WaitForExit(30000) | Out-Null
-    Get-Content "$env:TEMP\pd_host.log"
-    if ($client -ne 0 -or $host_proc.ExitCode -ne 0) { Write-Host "NETWORK TEST FAILED" -ForegroundColor Red; exit 1 }
+    foreach ($tr in @("enet", "websocket")) {
+        Write-Host "== Two-instance network test ($tr) =="
+        $host_proc = Start-Process -FilePath $Godot -ArgumentList "--headless --path `"$root`" res://tests/test_runner.tscn -- --net=host --transport=$tr" -PassThru -NoNewWindow -RedirectStandardOutput "$env:TEMP\pd_host_$tr.log"
+        Start-Sleep -Seconds 2
+        & $Godot --headless --path $root res://tests/test_runner.tscn -- --net=client --transport=$tr
+        $client = $LASTEXITCODE
+        $host_proc.WaitForExit(40000) | Out-Null
+        Get-Content "$env:TEMP\pd_host_$tr.log"
+        if ($client -ne 0 -or $host_proc.ExitCode -ne 0) { Write-Host "NETWORK TEST FAILED ($tr)" -ForegroundColor Red; exit 1 }
+    }
 }
 exit $local

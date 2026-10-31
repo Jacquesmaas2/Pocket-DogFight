@@ -28,7 +28,8 @@ func _ready() -> void:
 	box.add_child(UIKit.spacer(10))
 	box.add_child(UIKit.button("Story: Loek & Jacques", func() -> void: Game.goto("story_select")))
 	box.add_child(UIKit.button("Quick Match (offline)", _quick_match))
-	box.add_child(UIKit.button("Host Game", _host))
+	if not OS.has_feature("web"):
+		box.add_child(UIKit.button("Host Game", _host))
 	box.add_child(UIKit.button("Join Game", _show_join))
 	box.add_child(UIKit.button("Settings", func() -> void: _settings.open()))
 	if OS.get_name() != "Android" and OS.get_name() != "iOS":
@@ -47,7 +48,7 @@ func _ready() -> void:
 	jb.add_child(UIKit.label("Join a game", 26, UIKit.ACCENT, HORIZONTAL_ALIGNMENT_CENTER))
 	jb.add_child(UIKit.label("IP[:port], or ws:// / wss:// tunnel URL", 16, Color(1, 1, 1, 0.6), HORIZONTAL_ALIGNMENT_CENTER))
 	_address = LineEdit.new()
-	_address.text = Settings.last_address
+	_address.text = _url_server_param() if _url_server_param() != "" else Settings.last_address
 	_address.placeholder_text = "127.0.0.1"
 	_address.custom_minimum_size = Vector2(360, 48)
 	jb.add_child(_address)
@@ -82,6 +83,8 @@ func _ready() -> void:
 	var hb: Control = load("res://scripts/ui/host_dialog.gd").new()
 	hb.name = "HostDialog"
 	add_child(hb)
+	if _url_server_param() != "":
+		_show_join()
 
 
 func _quick_match() -> void:
@@ -114,3 +117,11 @@ func _join() -> void:
 
 func _on_failed(reason: String) -> void:
 	_status.text = reason
+
+
+## Browser builds: https://host/?server=wss://... pre-fills (and auto-opens) the join dialog.
+func _url_server_param() -> String:
+	if not OS.has_feature("web"):
+		return ""
+	var v = JavaScriptBridge.eval("new URLSearchParams(window.location.search).get('server') || ''", true)
+	return str(v).strip_edges() if v != null else ""
