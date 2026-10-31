@@ -1,0 +1,73 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/match_manager.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/arenas/asteroid_belt.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/gameplay/ship_registry.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/gameplay/projectile_manager.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/gameplay/powerup_manager.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/gameplay/game_camera.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/story/mission_runner.gd" id="7"]
+[ext_resource type="Script" path="res://scripts/ui/hud.gd" id="8"]
+[ext_resource type="Script" path="res://scripts/ui/touch_controls.gd" id="9"]
+[ext_resource type="Script" path="res://scripts/ui/dialogue_box.gd" id="10"]
+[ext_resource type="Script" path="res://scripts/ui/results_screen.gd" id="11"]
+[ext_resource type="Script" path="res://scripts/ui/settings_menu.gd" id="12"]
+[ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="13"]
+[ext_resource type="Script" path="res://scripts/ui/ui_root.gd" id="14"]
+
+[node name="Match" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Arena" parent="." instance=ExtResource("2")]
+
+[node name="Ships" type="Node2D" parent="."]
+script = ExtResource("3")
+
+[node name="Projectiles" type="Node2D" parent="."]
+script = ExtResource("4")
+
+[node name="PowerUps" type="Node2D" parent="."]
+script = ExtResource("5")
+
+[node name="FXLayer" type="Node2D" parent="."]
+z_index = 5
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("6")
+
+[node name="Story" type="Node" parent="."]
+script = ExtResource("7")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Root" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("14")
+
+[node name="HUD" type="Control" parent="UI/Root"]
+layout_mode = 1
+script = ExtResource("8")
+
+[node name="TouchControls" type="Control" parent="UI/Root"]
+layout_mode = 1
+script = ExtResource("9")
+
+[node name="Dialogue" type="Control" parent="UI/Root"]
+layout_mode = 1
+script = ExtResource("10")
+
+[node name="Results" type="Control" parent="UI/Root"]
+layout_mode = 1
+script = ExtResource("11")
+
+[node name="Settings" type="Control" parent="UI/Root"]
+layout_mode = 1
+script = ExtResource("12")
+
+[node name="PauseMenu" type="Control" parent="UI/Root"]
+layout_mode = 1
+script = ExtResource("13")

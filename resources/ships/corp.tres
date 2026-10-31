@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ShipStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/ship_stats.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Corporation Interceptor"
+visual_variant = "corp"
+acceleration = 1000.0
+rotation_speed = 4.4
+max_velocity = 560.0
+damping = 0.6
+max_health = 4
+boost_multiplier = 1.7
+collision_damage_speed = 420.0
+missile_ammo = 2

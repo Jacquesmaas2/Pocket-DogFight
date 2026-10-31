@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/weapon_stats.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+weapon_id = "laser"
+damage = 1
+cooldown = 0.22
+projectile_speed = 1100.0
+lifetime = 1.1

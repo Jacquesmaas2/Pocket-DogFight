@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ShipStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/ship_stats.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Galactic Security"
+visual_variant = "security"
+acceleration = 900.0
+rotation_speed = 3.8
+max_velocity = 500.0
+damping = 0.6
+max_health = 3
+boost_multiplier = 1.6
+collision_damage_speed = 420.0
+missile_ammo = 1

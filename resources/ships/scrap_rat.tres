@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ShipStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/ship_stats.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Scrap Rat"
+visual_variant = "scrap"
+acceleration = 800.0
+rotation_speed = 3.6
+max_velocity = 460.0
+damping = 0.6
+max_health = 2
+boost_multiplier = 1.5
+collision_damage_speed = 420.0
+missile_ammo = 0

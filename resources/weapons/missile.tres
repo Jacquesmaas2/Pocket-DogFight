@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/weapon_stats.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+weapon_id = "missile"
+damage = 2
+cooldown = 1.5
+projectile_speed = 620.0
+lifetime = 4.0
+turn_rate = 3.2
+explosion_radius = 90.0
+lock_range = 900.0
+lock_cone_degrees = 45.0

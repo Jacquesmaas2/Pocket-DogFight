@@ -1,0 +1,6 @@
+.godot/
+*.import
+export/
+*.keystore
+*.jks
+export_presets.cfg.local

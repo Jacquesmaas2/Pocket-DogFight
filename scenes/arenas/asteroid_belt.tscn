@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/gameplay/arena.gd" id="1"]
+
+[node name="AsteroidBelt" type="Node2D"]
+script = ExtResource("1")
+half_size = Vector2(1500, 950)
+asteroid_count = 22
+layout_seed = 1337

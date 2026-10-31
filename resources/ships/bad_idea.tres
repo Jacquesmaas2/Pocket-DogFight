@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ShipStats" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/core/ship_stats.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "The Bad Idea"
+visual_variant = "bad_idea"
+acceleration = 1100.0
+rotation_speed = 3.9
+max_velocity = 580.0
+damping = 0.45
+max_health = 3
+boost_multiplier = 2.0
+collision_damage_speed = 460.0
+missile_ammo = 3
