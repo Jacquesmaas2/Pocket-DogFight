@@ -206,8 +206,8 @@ func _run_local_tests() -> void:
 		get_tree().root.add_child(sc)
 		await get_tree().create_timer(3.0).timeout
 		var m: MatchManager = MatchManager.instance
-		var ok := m != null and m.story and m.ships.local_ship() != null and m.ships.all_ships().size() >= 2
-		check(ok, "story mission %d boots with player + AI (%d ships)" % [mid + 1, m.ships.all_ships().size() if m != null else 0])
+		var booted := m != null and m.story and m.ships.local_ship() != null and m.ships.all_ships().size() >= 2
+		check(booted, "story mission %d boots with player + AI (%d ships)" % [mid + 1, m.ships.all_ships().size() if m != null else 0])
 		sc.queue_free()
 		await frames(2)
 
