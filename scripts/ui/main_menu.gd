@@ -9,6 +9,7 @@ var _friends_panel: PanelContainer
 var _name_edit: LineEdit
 var _ship_opt: OptionButton
 var _online_btn: Button
+var _server_badge: Label
 var _connecting: bool = false
 var _http: HTTPRequest
 
@@ -25,6 +26,7 @@ func _ready() -> void:
 
 	_build_main()
 	_build_pilot_card()
+	_build_server_badge()
 	_build_friends_panel()
 	_build_join_panel()
 	_build_help()
@@ -50,38 +52,40 @@ func _ready() -> void:
 func _build_main() -> void:
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
-	box.add_theme_constant_override("separation", 10)
+	box.add_theme_constant_override("separation", 9)
+	box.add_child(UIKit.label("ASTEROID BELT  /  FLIGHT CREW", 14, UIKit.ACCENT, HORIZONTAL_ALIGNMENT_CENTER))
 	var t := UIKit.title("POCKET DOGFIGHT")
-	t.add_theme_font_size_override("font_size", 58)
+	t.add_theme_font_size_override("font_size", 50)
 	box.add_child(t)
-	box.add_child(UIKit.label("Two pilots. Tiny ships. Big explosions.", 20, Color(1, 1, 1, 0.7), HORIZONTAL_ALIGNMENT_CENTER))
-	box.add_child(UIKit.spacer(8))
-	_online_btn = UIKit.button("PLAY ONLINE", _play_online, 320)
-	_online_btn.custom_minimum_size.y = 68
-	_online_btn.add_theme_font_size_override("font_size", 28)
+	box.add_child(UIKit.label("TWO PILOTS. QUESTIONABLE DECISIONS.", 15, Color(0.7, 0.79, 0.87), HORIZONTAL_ALIGNMENT_CENTER))
+	box.add_child(UIKit.spacer(10))
+	_online_btn = UIKit.primary_button("PLAY ONLINE", _play_online, 340)
+	_online_btn.custom_minimum_size.y = 64
+	_online_btn.add_theme_font_size_override("font_size", 26)
 	box.add_child(_online_btn)
-	box.add_child(UIKit.button("Play with friends", func() -> void: _show(_friends_panel), 320))
-	box.add_child(UIKit.button("Story: Loek & Jacques", func() -> void: Game.goto("story_select"), 320))
-	box.add_child(UIKit.button("Practice vs bots", _quick_match, 320))
-	box.add_child(UIKit.button("Settings", func() -> void: _settings.open(), 320))
+	box.add_child(UIKit.button("PLAY WITH FRIENDS", func() -> void: _show(_friends_panel), 340))
+	box.add_child(UIKit.button("STORY   /   LOEK & JACQUES", func() -> void: Game.goto("story_select"), 340))
+	box.add_child(UIKit.button("PRACTICE VS BOTS", _quick_match, 340))
+	box.add_child(UIKit.button("SETTINGS", func() -> void: _settings.open(), 340))
 	if OS.get_name() not in ["Android", "iOS", "Web"]:
-		box.add_child(UIKit.button("Quit", func() -> void: get_tree().quit(), 320))
-	_status = UIKit.label("", 18, Color("ffe04a"), HORIZONTAL_ALIGNMENT_CENTER)
+		box.add_child(UIKit.button("QUIT", func() -> void: get_tree().quit(), 340))
+	_status = UIKit.label("", 16, Color("ffd166"), HORIZONTAL_ALIGNMENT_CENTER)
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.custom_minimum_size.x = 420
+	_status.custom_minimum_size.x = 380
 	box.add_child(_status)
-	box.set_anchors_preset(PRESET_CENTER)
-	box.offset_left = -220
-	box.offset_right = 220
-	box.offset_top = -330
-	box.offset_bottom = 330
-	add_child(box)
+	var panel := UIKit.panel(box)
+	panel.set_anchors_preset(PRESET_CENTER)
+	panel.offset_left = -250
+	panel.offset_right = 250
+	panel.offset_top = -315
+	panel.offset_bottom = 315
+	add_child(panel)
 
 
 func _build_pilot_card() -> void:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 6)
-	col.add_child(UIKit.label("YOUR PILOT", 16, UIKit.ACCENT))
+	col.add_child(UIKit.label("FLIGHT ID", 13, UIKit.ACCENT))
 	_name_edit = LineEdit.new()
 	_name_edit.max_length = 16
 	_name_edit.placeholder_text = "Callsign"
@@ -107,6 +111,18 @@ func _build_pilot_card() -> void:
 	card.offset_bottom = 170
 	add_child(card)
 	_refresh_pilot()
+
+
+func _build_server_badge() -> void:
+	_server_badge = UIKit.label("", 13, Color.WHITE)
+	_server_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_server_badge.set_anchors_preset(PRESET_TOP_RIGHT)
+	_server_badge.offset_left = -330
+	_server_badge.offset_right = -20
+	_server_badge.offset_top = 18
+	_server_badge.offset_bottom = 42
+	add_child(_server_badge)
+	_refresh_online_button()
 
 
 func _build_friends_panel() -> void:
@@ -198,8 +214,11 @@ func _refresh_pilot() -> void:
 
 func _refresh_online_button() -> void:
 	var has := Net.default_server != ""
-	_online_btn.text = "PLAY ONLINE" if has else "PLAY ONLINE  (no server set)"
-	_online_btn.tooltip_text = Net.default_server if has else "No public server configured. Use 'Play with friends' to join a link."
+	_online_btn.text = "PLAY ONLINE"
+	_online_btn.tooltip_text = Net.default_server if has else "Connect to a friend's link or set up a host in Play with friends."
+	if _server_badge != null:
+		_server_badge.text = "●  ONLINE SERVER READY" if has else "○  JOIN A FRIEND OR HOST A GAME"
+		_server_badge.add_theme_color_override("font_color", Color("7dffb3") if has else Color("c4ced8"))
 
 
 func _play_online() -> void:

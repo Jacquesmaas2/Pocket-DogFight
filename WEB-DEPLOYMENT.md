@@ -28,7 +28,7 @@ Local equivalent: `.\tools\export_web.ps1` produces the same `build/web`.
 
 ## GitHub Pages configuration (one-time, manual)
 
-1. Push this repository to GitHub (no remote is configured yet: `git remote add origin <url>` then `git push -u origin main`).
+1. This repository is connected to GitHub at `https://github.com/Jacquesmaas2/Pocket-DogFight` on branch `main`.
 2. Repository → **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 3. (First run only) Settings → Actions → General → Workflow permissions: *Read and write* is **not** required; the workflow declares `pages: write` + `id-token: write` itself.
 
@@ -50,12 +50,12 @@ Deep link: `https://<pages-url>/?server=wss://host:port` pre-fills and opens the
 ### Online hosting system (how PLAY ONLINE works)
 
 ```
-Browser client (GitHub Pages)  --wss-->  dedicated server (Docker, Fly.io/Render/any host, or your laptop + tunnel)
+Browser client (GitHub Pages)  --wss-->  dedicated server (Docker on Render/another host, or your laptop + tunnel)
          ^ reads build/web/server.txt  <--  written by the deploy workflow from repo variable DEFAULT_SERVER_URL
 ```
 
 1. **Run a server** (pick one):
-   - **Cloud (always on):** `fly launch --no-deploy --copy-config --name <app>` then `fly deploy` (uses [fly.toml](fly.toml) + [server/Dockerfile](server/Dockerfile)); address `wss://<app>.fly.dev`. Or Render: *New → Blueprint* on this repo ([render.yaml](render.yaml)); address `wss://<service>.onrender.com`. Both require your own account; nothing is provisioned from this repo automatically.
+    - **Cloud server:** Render: *New → Blueprint* on this repo ([render.yaml](render.yaml)); address `wss://<service>.onrender.com`. The free tier may sleep while idle. This server is separate from GitHub Pages and requires your own Render account; Pages itself serves only the Godot Web client.
    - **Laptop:** `.\tools\go_online.ps1` starts server + cloudflared tunnel and copies the share link to the clipboard (address changes on every restart).
 2. **Tell the web client:** GitHub → Settings → Secrets and variables → Actions → **Variables** → `DEFAULT_SERVER_URL = wss://<your-server>` → re-run the deploy workflow. `server.txt` is published next to `index.html`; the big **PLAY ONLINE** button connects there. Native builds use `PD_DEFAULT_SERVER` env or `pocket_dogfight/default_server` in `project.godot`.
 3. Share links always work regardless: `<pages-url>/?server=wss://…` (the lobby has a **Copy** button).

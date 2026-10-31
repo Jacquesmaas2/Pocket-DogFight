@@ -12,26 +12,31 @@ static func theme() -> Theme:
 	var t := Theme.new()
 	t.default_font_size = 22
 	var btn := StyleBoxFlat.new()
-	btn.bg_color = Color(0.12, 0.18, 0.36, 1.0)
-	btn.set_corner_radius_all(10)
+	btn.bg_color = Color("101c33")
+	btn.set_corner_radius_all(7)
 	btn.content_margin_left = 22
 	btn.content_margin_right = 22
 	btn.content_margin_top = 12
 	btn.content_margin_bottom = 12
-	btn.border_width_bottom = 3
-	btn.border_color = Color(0.06, 0.09, 0.2)
+	btn.border_width_left = 3
+	btn.border_color = Color("23445d")
 	var hover := btn.duplicate()
-	hover.bg_color = Color(0.18, 0.3, 0.55, 1.0)
+	hover.bg_color = Color("18304b")
+	hover.border_color = ACCENT
 	var pressed := btn.duplicate()
-	pressed.bg_color = ACCENT.darkened(0.3)
+	pressed.bg_color = Color("1b596a")
 	var disabled := btn.duplicate()
-	disabled.bg_color = Color(0.1, 0.1, 0.14, 0.7)
+	disabled.bg_color = Color("101522")
 	t.set_stylebox("normal", "Button", btn)
 	t.set_stylebox("hover", "Button", hover)
 	t.set_stylebox("pressed", "Button", pressed)
 	t.set_stylebox("disabled", "Button", disabled)
 	t.set_stylebox("focus", "Button", hover)
 	t.set_font_size("font_size", "Button", 24)
+	t.set_color("font_color", "Button", Color("e8f4ff"))
+	t.set_color("font_hover_color", "Button", Color.WHITE)
+	t.set_color("font_pressed_color", "Button", Color.WHITE)
+	t.set_color("font_disabled_color", "Button", Color("7e8997"))
 	var edit := StyleBoxFlat.new()
 	edit.bg_color = Color(0.02, 0.03, 0.08, 1.0)
 	edit.set_corner_radius_all(8)
@@ -80,6 +85,31 @@ static func button(text: String, callback: Callable, min_width: float = 260.0) -
 	return b
 
 
+static func primary_button(text: String, callback: Callable, min_width: float = 300.0) -> Button:
+	var b := button(text, callback, min_width)
+	var normal := StyleBoxFlat.new()
+	normal.bg_color = ACCENT
+	normal.set_corner_radius_all(7)
+	normal.border_width_bottom = 3
+	normal.border_color = Color("23798b")
+	normal.content_margin_left = 24
+	normal.content_margin_right = 24
+	normal.content_margin_top = 14
+	normal.content_margin_bottom = 14
+	var hover := normal.duplicate()
+	hover.bg_color = Color("82e4ff")
+	var pressed := normal.duplicate()
+	pressed.bg_color = Color("32a8c4")
+	b.add_theme_stylebox_override("normal", normal)
+	b.add_theme_stylebox_override("hover", hover)
+	b.add_theme_stylebox_override("focus", hover)
+	b.add_theme_stylebox_override("pressed", pressed)
+	b.add_theme_color_override("font_color", Color("071421"))
+	b.add_theme_color_override("font_hover_color", Color("071421"))
+	b.add_theme_color_override("font_pressed_color", Color.WHITE)
+	return b
+
+
 static func spacer(h: float = 12.0) -> Control:
 	var c := Control.new()
 	c.custom_minimum_size = Vector2(0, h)
@@ -88,6 +118,19 @@ static func spacer(h: float = 12.0) -> Control:
 
 static func panel(child: Control) -> PanelContainer:
 	var p := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.025, 0.045, 0.085, 0.94)
+	style.set_corner_radius_all(8)
+	style.border_width_left = 1
+	style.border_width_right = 1
+	style.border_width_top = 1
+	style.border_width_bottom = 1
+	style.border_color = Color("244054")
+	style.content_margin_left = 20
+	style.content_margin_right = 20
+	style.content_margin_top = 18
+	style.content_margin_bottom = 18
+	p.add_theme_stylebox_override("panel", style)
 	p.add_child(child)
 	return p
 
