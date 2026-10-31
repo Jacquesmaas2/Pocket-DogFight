@@ -1,7 +1,7 @@
-# Serves the exported web build (export/web) over HTTP and optionally exposes it via cloudflared.
+# Serves the exported web build (build/web) over HTTP and optionally exposes it via cloudflared.
 # Usage: .\tools\serve_web.ps1 [-Port 8080] [-Tunnel] [-Server wss://game-server-url]
 param([int]$Port = 8080, [switch]$Tunnel, [string]$Server = "")
-$root = Join-Path (Split-Path -Parent $PSScriptRoot) "export\web"
+$root = Join-Path (Split-Path -Parent $PSScriptRoot) "build\web"
 if (-not (Test-Path "$root\index.html")) { Write-Error "No web build. Run .\tools\export_web.ps1 first."; exit 1 }
 $mime = @{ ".html"="text/html"; ".js"="application/javascript"; ".wasm"="application/wasm"; ".pck"="application/octet-stream"; ".png"="image/png"; ".svg"="image/svg+xml"; ".json"="application/json"; ".ico"="image/x-icon" }
 $listener = New-Object System.Net.HttpListener

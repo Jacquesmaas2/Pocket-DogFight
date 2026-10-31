@@ -32,7 +32,7 @@ func _ready() -> void:
 		box.add_child(UIKit.button("Host Game", _host))
 	box.add_child(UIKit.button("Join Game", _show_join))
 	box.add_child(UIKit.button("Settings", func() -> void: _settings.open()))
-	if OS.get_name() != "Android" and OS.get_name() != "iOS":
+	if OS.get_name() not in ["Android", "iOS", "Web"]:
 		box.add_child(UIKit.button("Quit", func() -> void: get_tree().quit()))
 	_status = UIKit.label("", 18, Color("ffe04a"), HORIZONTAL_ALIGNMENT_CENTER)
 	box.add_child(_status)

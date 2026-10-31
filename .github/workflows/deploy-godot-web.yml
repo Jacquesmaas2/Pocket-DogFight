@@ -1,0 +1,92 @@
+name: Deploy Godot Web build to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine Godot version from project.godot
+        id: godot
+        run: |
+          set -euo pipefail
+          # config/features=PackedStringArray("4.3", "GL Compatibility") -> 4.3
+          minor=$(grep -oP 'config/features=PackedStringArray\("\K[0-9]+\.[0-9]+' project.godot)
+          [ -n "$minor" ] || { echo "Could not read Godot version from project.godot"; exit 1; }
+          echo "version=${minor}-stable" >> "$GITHUB_OUTPUT"
+          echo "template_dir=${minor}.stable" >> "$GITHUB_OUTPUT"
+          echo "Godot ${minor}-stable"
+
+      - name: Cache Godot binary and export templates
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot
+            ~/.local/share/godot/export_templates
+          key: godot-${{ steps.godot.outputs.version }}-linux-web
+
+      - name: Download Godot and Web export templates
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          V: ${{ steps.godot.outputs.version }}
+          TDIR: ${{ steps.godot.outputs.template_dir }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/godot "$HOME/.local/share/godot/export_templates/$TDIR"
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_linux.x86_64.zip"
+          unzip -q godot.zip -d ~/godot
+          mv ~/godot/Godot_v${V}_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+          curl -sSL -o templates.tpz "https://github.com/godotengine/godot/releases/download/${V}/Godot_v${V}_export_templates.tpz"
+          # Only the web templates are needed; the archive root folder is "templates/".
+          unzip -q -j templates.tpz 'templates/web_*' 'templates/version.txt' -d "$HOME/.local/share/godot/export_templates/$TDIR"
+          rm -f godot.zip templates.tpz
+
+      - name: Import project (headless)
+        run: ~/godot/godot --headless --path . --import --quit || true
+
+      - name: Export Web build
+        run: |
+          set -euo pipefail
+          mkdir -p build/web
+          touch build/.gdignore
+          ~/godot/godot --headless --path . --export-release Web build/web/index.html
+          test -f build/web/index.html || { echo "index.html was not generated"; exit 1; }
+          test -f build/web/index.wasm || { echo "index.wasm was not generated"; exit 1; }
+          test -f build/web/index.pck || { echo "index.pck was not generated"; exit 1; }
+          rm -f build/.gdignore build/web/*.import
+          ls -la build/web
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

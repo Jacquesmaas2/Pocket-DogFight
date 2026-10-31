@@ -11,6 +11,7 @@ signal hosting_started
 
 const TRANSPORT_ENET := "enet"
 const TRANSPORT_WEBSOCKET := "websocket"
+const TRANSPORT_WEBRTC := "webrtc" # reserved: needs a signaling service + STUN/TURN; not implemented yet
 
 var players: Dictionary = {} # peer_id -> {name, ship, color, score, kills, deaths}
 var is_dedicated: bool = false
@@ -18,6 +19,9 @@ var transport: String = TRANSPORT_WEBSOCKET
 var port: int = 24565
 var public_url: String = ""
 var story_mode: bool = false
+# External multiplayer service configuration (never committed values; see WEB-DEPLOYMENT.md).
+var signaling_url: String = ""
+var ice_servers: Array = [] # e.g. [{"urls": ["stun:stun.example.org:3478"]}]
 
 var _pending_timeout: SceneTreeTimer
 
@@ -40,6 +44,12 @@ func _read_environment() -> void:
 	if env_transport in [TRANSPORT_ENET, TRANSPORT_WEBSOCKET]:
 		transport = env_transport
 	public_url = OS.get_environment("PD_PUBLIC_URL")
+	signaling_url = OS.get_environment("PD_SIGNALING_URL")
+	var ice := OS.get_environment("PD_ICE_SERVERS")
+	if ice != "":
+		var parsed = JSON.parse_string(ice)
+		if parsed is Array:
+			ice_servers = parsed
 	for arg in OS.get_cmdline_user_args():
 		if arg == "--server":
 			is_dedicated = true
@@ -61,11 +71,22 @@ func is_online() -> bool:
 	return multiplayer.multiplayer_peer != null and not (multiplayer.multiplayer_peer is OfflineMultiplayerPeer)
 
 
+## Browsers cannot open listening sockets and have no ENet; only WebSocket clients work there.
+func can_host() -> bool:
+	return not OS.has_feature("web")
+
+
 # ---------------------------------------------------------------- hosting
 func host(use_transport: String = "", dedicated: bool = false) -> Error:
 	leave()
+	if not can_host():
+		connection_failed.emit("Hosting is not available in the browser build")
+		return ERR_UNAVAILABLE
 	if use_transport != "":
 		transport = use_transport
+	if transport == TRANSPORT_WEBRTC:
+		connection_failed.emit("WebRTC transport is not implemented yet")
+		return ERR_UNAVAILABLE
 	var peer: MultiplayerPeer
 	var err: Error
 	if transport == TRANSPORT_ENET:
@@ -108,6 +129,9 @@ func join(address: String) -> Error:
 		return ERR_INVALID_PARAMETER
 	var peer: MultiplayerPeer
 	var err: Error
+	if address.begins_with("webrtc://"):
+		connection_failed.emit("WebRTC transport is not implemented yet")
+		return ERR_UNAVAILABLE
 	if address.begins_with("ws://") or address.begins_with("wss://"):
 		var ws := WebSocketMultiplayerPeer.new()
 		err = ws.create_client(address)
@@ -122,7 +146,7 @@ func join(address: String) -> Error:
 			var p := address.get_slice(":", 1)
 			if p.is_valid_int():
 				join_port = int(p)
-		if transport == TRANSPORT_WEBSOCKET and not force_enet:
+		if transport == TRANSPORT_WEBSOCKET and not force_enet or OS.has_feature("web"):
 			var ws := WebSocketMultiplayerPeer.new()
 			err = ws.create_client("ws://%s:%d" % [host_name, join_port])
 			peer = ws
