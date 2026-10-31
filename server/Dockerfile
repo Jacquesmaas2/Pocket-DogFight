@@ -1,5 +1,5 @@
 # Pocket Dogfight dedicated server (headless Godot, WebSocket transport).
-# Works on Fly.io, Render, Railway, any Docker host. Listens on $PORT (default 8080).
+# Works on Render or any Docker host. Listens on $PORT (default 8080).
 FROM ubuntu:24.04
 ARG GODOT_VERSION=4.3-stable
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl unzip libfontconfig1 \

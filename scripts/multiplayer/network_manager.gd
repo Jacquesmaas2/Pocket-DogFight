@@ -48,7 +48,7 @@ func _read_environment() -> void:
 		default_server = env_default
 	var env_port := OS.get_environment("PD_PORT")
 	if env_port == "":
-		env_port = OS.get_environment("PORT") # Fly.io / Render / Railway convention
+		env_port = OS.get_environment("PORT") # Common container-host port convention
 	if env_port.is_valid_int():
 		port = int(env_port)
 	var env_transport := OS.get_environment("PD_TRANSPORT")
